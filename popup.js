@@ -18,7 +18,8 @@ document.getElementById("generate").addEventListener("click", async () => {
       suggestionsDiv.innerHTML = "";
 
       // 🧠 Call your local backend API
-      const res = await fetch("http://localhost:5000/api/generate-comments", {
+      // const res = await fetch("http://localhost:5000/api/generate-comments", {
+      const res = await fetch("https://linked-in-commentor.vercel.app/api/generate-comments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ postText }),

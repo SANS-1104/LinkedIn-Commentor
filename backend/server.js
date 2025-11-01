@@ -7,7 +7,12 @@ import dotenv from "dotenv";
 dotenv.config();
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: "*", // later you can replace this with your Chrome extension ID for more security
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type"],
+}));
+
 app.use(express.json());
 
 const GEMINI_API_URL =
