@@ -152,16 +152,16 @@ document.getElementById("generate").addEventListener("click", async () => {
     suggestionsDiv.innerHTML = "";
 
     // 🌐 Call your backend
-    // const res = await fetch("https://linked-in-commentor.vercel.app/api/generate-comments", {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify({ postText }),
-    // });
-    const res = await fetch("http://localhost:5000/api/generate-comments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ postText }),
-      });
+    const res = await fetch("https://linked-in-commentor.vercel.app/api/generate-comments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ postText }),
+    });
+    // const res = await fetch("http://localhost:5000/api/generate-comments", {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify({ postText }),
+    //   });
 
     loader.style.display = "none";
 
