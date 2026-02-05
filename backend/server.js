@@ -16,7 +16,7 @@ app.use(cors({
 app.use(express.json());
 
 const GEMINI_API_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=" +
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=" +
   process.env.GEMINI_API_KEY;
 
 // ✅ Health check route
