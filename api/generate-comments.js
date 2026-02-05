@@ -28,7 +28,7 @@ Return each comment on a new line and add relevant emojis.
 `;
 
     const GEMINI_API_URL =
-      "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=" +
+      "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=" +
       process.env.GEMINI_API_KEY;
 
     const response = await fetch(GEMINI_API_URL, {
