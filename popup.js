@@ -81,8 +81,10 @@ async function extractPostText(tabId) {
         "div.scaffold-finite-scroll__content > div"
       ];
 
-      const posts = document.querySelectorAll(postSelectors.join(","));
-      console.log(`🔍 Found ${posts.length} possible posts (execScript)`);
+      const posts = Array.from(document.querySelectorAll('div'))
+        .filter(div => div.innerText && div.innerText.length > 100);
+
+      console.log("Possible posts:", posts.length);
 
       let visiblePost = null;
       let maxVisibleArea = 0;
@@ -152,16 +154,16 @@ document.getElementById("generate").addEventListener("click", async () => {
     suggestionsDiv.innerHTML = "";
 
     // 🌐 Call your backend
-    const res = await fetch("https://linked-in-commentor.vercel.app/api/generate-comments", {
+    // const res = await fetch("https://linked-in-commentor.vercel.app/api/generate-comments", {
+    //   method: "POST",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify({ postText }),
+    // });
+    const res = await fetch("http://localhost:5000/api/generate-comments", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ postText }),
     });
-    // const res = await fetch("http://localhost:5000/api/generate-comments", {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({ postText }),
-    //   });
 
     loader.style.display = "none";
 

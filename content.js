@@ -1,134 +1,65 @@
-console.log("✅ LinkedIn Commenter content.js loaded (stable mode)");
-
-// function getVisiblePostText() {
-//   const postSelectors = [
-//     "div.feed-shared-update-v2",
-//     "div.feed-shared-update",
-//     "div.update-components-update",
-//     "div.occludable-update",
-//     "div.relative.feed-shared-update-v2",
-//     "div.scaffold-finite-scroll__content > div"
-//   ];
-
-//   const posts = document.querySelectorAll(postSelectors.join(","));
-//   console.log(`🔍 Found ${posts.length} possible posts`);
-
-//   let visiblePost = null;
-//   let maxVisibleArea = 0;
-
-//   posts.forEach(post => {
-//     const rect = post.getBoundingClientRect();
-//     const visibleHeight = Math.min(window.innerHeight, rect.bottom) - Math.max(0, rect.top);
-//     const visibleArea = visibleHeight * rect.width;
-
-//     if (visibleArea > maxVisibleArea && visibleHeight > 120) {
-//       visiblePost = post;
-//       maxVisibleArea = visibleArea;
-//     }
-//   });
-
-//   if (!visiblePost) {
-//     console.warn("⚠️ No visible post element found");
-//     return null;
-//   }
-
-//   visiblePost.style.outline = "2px solid #0077ff";
-//   visiblePost.scrollIntoView({ behavior: "smooth", block: "center" });
-
-//   const allTextNodes = Array.from(
-//     visiblePost.querySelectorAll("div, span, p")
-//   ).filter(el =>
-//     el.innerText &&
-//     el.innerText.trim().length > 30 &&
-//     !el.innerText.includes("See more") &&
-//     !el.innerText.includes("likes") &&
-//     !el.innerText.includes("comments")
-//   );
-
-//   if (allTextNodes.length === 0) {
-//     console.warn("⚠️ No text nodes found inside visible post");
-//     return null;
-//   }
-
-//   const textElement = allTextNodes.reduce((a, b) =>
-//     a.innerText.length > b.innerText.length ? a : b
-//   );
-
-//   const text = textElement.innerText.trim();
-//   console.log("📘 Found text element:", textElement, "Sample:", text.slice(0, 120), "...");
-//   return text;
-// }
-
+console.log("✅ LinkedIn Commenter content.js loaded (FINAL)");
 
 function getVisiblePostText() {
-  // NEW robust selector
-  const posts = document.querySelectorAll('[data-id]');
+  // ✅ Try multiple selectors (VERY IMPORTANT)
+  const selectors = [
+    '[data-test-id="main-feed-activity-card__commentary"]',
+    '.update-components-text',
+    '.break-words',
+    'span[dir="ltr"]'
+  ];
 
-  console.log(`🔍 Found ${posts.length} possible posts`);
+  let elements = [];
 
-  let visiblePost = null;
-
-  for (let post of posts) {
-    const rect = post.getBoundingClientRect();
-
-    if (
-      rect.top >= 0 &&
-      rect.bottom <= window.innerHeight &&
-      rect.height > 100
-    ) {
-      visiblePost = post;
-      break;
-    }
-  }
-
-  if (!visiblePost) {
-    console.warn("⚠️ No visible post element found");
-    return null;
-  }
-
-  visiblePost.style.outline = "2px solid red";
-
-  // 🔥 Updated text extraction
-  const textBlocks = visiblePost.querySelectorAll(
-    'span[dir="ltr"], div[dir="ltr"]'
-  );
-
-  let longestText = "";
-
-  textBlocks.forEach(el => {
-    const text = el.innerText.trim();
-    if (text.length > longestText.length) {
-      longestText = text;
-    }
+  selectors.forEach(sel => {
+    elements.push(...document.querySelectorAll(sel));
   });
 
-  console.log("📘 Extracted:", longestText.slice(0, 150));
+  console.log(`🔍 Found ${elements.length} possible text elements`);
 
-  return longestText || null;
+  for (let el of elements) {
+    const rect = el.getBoundingClientRect();
+
+    if (rect.top >= 0 && rect.top < window.innerHeight * 0.6) {
+      const text = el.innerText?.trim();
+
+      if (text && text.length > 30) {
+        el.style.outline = "2px solid red";
+        console.log("✅ Extracted:", text.slice(0, 150));
+        return text;
+      }
+    }
+  }
+
+  console.warn("⚠️ No visible post found");
+  return null;
 }
 
 
-// 🎧 Listen for popup messages
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === "get_post_content") {
-    console.log("📩 Message received from popup: get_post_content");
+// ✅ SINGLE listener (correct way)
+if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.onMessage) {
+  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === "get_post_content") {
+      console.log("📩 Message received from popup");
 
-    setTimeout(() => {
-      try {
-        const postText = getVisiblePostText();
-        if (postText) {
-          console.log("✅ Sending extracted text back to popup");
-          sendResponse({ success: true, text: postText });
-        } else {
-          console.warn("⚠️ No post text detected.");
-          sendResponse({ success: false, text: "" });
+      setTimeout(() => {
+        try {
+          const postText = getVisiblePostText();
+
+          if (postText) {
+            sendResponse({ success: true, text: postText });
+          } else {
+            sendResponse({ success: false, text: "" });
+          }
+        } catch (err) {
+          console.error("❌ Error:", err);
+          sendResponse({ success: false, error: err.message });
         }
-      } catch (err) {
-        console.error("Extraction error:", err);
-        sendResponse({ success: false, text: "", error: err.message });
-      }
-    }, 200); // small delay ensures DOM stability
+      }, 500); // ⬅️ increased delay (IMPORTANT)
 
-    return true; // keep channel open
-  }
-});
+      return true;
+    }
+  });
+} else {
+  console.warn("⚠️ chrome.runtime not available");
+}
